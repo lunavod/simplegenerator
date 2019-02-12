@@ -1,4 +1,6 @@
 # Simple Generator
+Generate template things simply and quickly.
+
 Simple generator is just a little and simple generator.
 To create a template, you just need to run `sg initTemplate` and answer several questions.
 

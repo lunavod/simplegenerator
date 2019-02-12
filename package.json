@@ -1,7 +1,7 @@
 {
-  "name": "simplegenerator",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@nekolu/simplegenerator",
+  "version": "1.0.2",
+  "description": "Generate template things simply and quickly.",
   "main": "cli.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,5 +14,13 @@
   },
   "bin": {
     "sg": "./cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/NekoLu/simplegenerator"
+  },
+  "homepage": "https://gitlab.com/NekoLu/simplegenerator",
+  "bugs": {
+    "url": "https://gitlab.com/NekoLu/simplegenerator/issues"
   }
 }
