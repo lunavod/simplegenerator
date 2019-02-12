@@ -1,0 +1,16 @@
+import React, { PureComponent } from 'react'
+##SG:IF(PROPTYPES)##
+import PropTypes from 'prop-types';
+##SG:ENDIF(PROPTYPES)##
+
+import './styles.css'
+
+export default class ##SG:NAME## extends PureComponent {
+    render() {
+        return <div>It's ##SG:NAME##!</div>
+    }
+
+    static propTypes = {
+
+    }
+}
