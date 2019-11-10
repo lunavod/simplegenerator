@@ -106,10 +106,10 @@ function generate(command_args, standalone=false) {
 
     function process(s) {
         function processIf(s) {
-            while (s.match(/##SG:IF\((.+?)\)##/g)) {
-                let ifStart = s.match(/##SG:IF\((.+?)\)##/g)[0]
-                let name = ifStart.replace(/##SG:IF\((.+?)\)##/g, (_, name)=>name)
-                s = s.replace(RegExp(`##SG:IF\\(${name}\\)##([.\\s\\S]+?)\n?##SG:ENDIF\\(${name}\\)##`), (_, content)=>{
+            while (s.match(/##SG#IF\((.+?)\)##/g)) {
+                let ifStart = s.match(/##SG#IF\((.+?)\)##/g)[0]
+                let name = ifStart.replace(/##SG#IF\((.+?)\)##/g, (_, name)=>name)
+                s = s.replace(RegExp(`##SG#IF\\(${name}\\)##([.\\s\\S]+?)\n?##SG#ENDIF\\(${name}\\)##`), (_, content)=>{
                     if (!(name.toLowerCase() in data)) return ''
                     let val = data[name.toLowerCase()].value
                     return val !== '0' && val !== 'false' ? content : ''
@@ -118,7 +118,7 @@ function generate(command_args, standalone=false) {
             return s
         }
         s = processIf(s)
-        s = s.replace(/##SG:(.+?)##/g, (_, name)=>{
+        s = s.replace(/##SG#(.+?)##/g, (_, name)=>{
             if (!(name.toLowerCase() in data)) throw(`Oops, looks like you forgot to provide a value for '${name.toLowerCase()}'`)
             return data[name.toLowerCase()].value
         })
@@ -131,9 +131,10 @@ function generate(command_args, standalone=false) {
             const dirFile = path.join(dir, file);
             const dirent = fs.statSync(dirFile);
             if (dirent.isDirectory()) {
+				console.log(dirFile, config)
                 var odir = {
                     path: dirFile,
-                    new_path: process(dirFile.replace(`.sg_templates/${command_args[0]}/`, config.path)),
+                    new_path: process(dirFile.replace(`.sg_templates/${command_args[0]}/`, config.path).replace(`.sg_templates\\${command_args[0]}\\`, config.path)),
                     type: 'directory',
                     files: []
                 }
@@ -141,7 +142,7 @@ function generate(command_args, standalone=false) {
                 filelist.push(odir);
             } else {
                 if (!path.basename(dirFile).startsWith('.sg')) {
-                    let newPath = process(dirFile.replace(`.sg_templates/${command_args[0]}/`, config.path))
+                    let newPath = process(dirFile.replace(`.sg_templates/${command_args[0]}/`, config.path).replace(`.sg_templates\\${command_args[0]}\\`, config.path))
                     if (newPath.endsWith('.sg')) newPath = newPath.slice(0, newPath.length-3)
                     filelist.push({
                         path: dirFile,
@@ -207,7 +208,7 @@ function initTemplate(command_args) {
         console.log(chalk.cyan(`Yay, '.sg_templates' directory created`))
     }
     function questionName() {
-        let a = prompt('So, how to name this template? ')
+        let a = prompt('So, how do you want to name this template? ')
         if (!a) {
             console.log(chalk.red(`Sorry, i can't create directory with empty name (`))
             return questionName()
@@ -223,7 +224,7 @@ function initTemplate(command_args) {
     if (fs.existsSync('.sg_templates/'+name)) {
         console.log(chalk.red(`Template ${name} already exists! D:`))
         name = questionName()
-    }
+	}
     fs.mkdirSync(`.sg_templates/${name}`)
     console.log(chalk.cyan(`.sg_templates/${name} created!`))
     function questionTemplatePath() {
@@ -232,7 +233,8 @@ function initTemplate(command_args) {
             a = prompt(`Are you sure? This field is required, so if you leave this empty generation will not work. (no) `)
             if (a==='no'||a==='n'||a==='')
                 return questionTemplatePath()
-        }
+		}
+		if (!a.endsWith('/') && !a.endsWith('\\')) a += '/'
         return a
     }
     let templatePath = command_args[1]
@@ -248,9 +250,9 @@ Your template is ready now! But it's empty.
 You should put some directories and files in it.
 You can use SG syntax in any filenames and inside files with *.sg extensions. (After generation extension will be deleted, so 'test.js.sg' will become just 'test.js')
 SG syntax:
-1) ##SG:VARIABLENAME##
+1) ##SG#VARIABLENAME##
     This will simply be replaced by the value of the variable during generation.
-2) ##SG:IF(VARIABLENAME)##...##SG:ENDIF(VARIABLENAME)##
+2) ##SG#IF(VARIABLENAME)##...##SG#ENDIF(VARIABLENAME)##
     It's simple. If at generation there will be a variable with the same name, the content in the condition will be written to the file. If not ... Well, you understand.
     WARN: No else, no logic. Just simplest if.
 And, by the way, variable names are not case sensitive. Like, at all.
@@ -263,7 +265,8 @@ To pass variable without value (you should only use it for IF, otherwise instead
 }
 
 const commands = {
-    generate: generate,
+	generate: generate,
+	g: generate,
     test: test,
     initTemplate: initTemplate
 }
